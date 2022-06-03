@@ -57,9 +57,11 @@ func (c *ClockWidget) UpdateBorderColor() {
 	}
 }
 
-// Runs update() if no error happens, updates every second in a goroutine.
+// Runs update() if no error happens, starts a goroutine.
+// First goroutine create a channel, start loopCurrentTime as a goroutine.
+// Listen to the channel for a new value.
 func (c *ClockWidget) Run() {
-	err := c.update()
+	err := c.update(getFormattedTime(time.Now()))
 
 	if err != nil {
 		logger.Log.Error.Println(err)
@@ -67,15 +69,21 @@ func (c *ClockWidget) Run() {
 	}
 
 	go func() {
-		for range time.Tick(time.Second) {
-			c.update()
+		timeCh := make(chan string)
+		go loopCurrentTime(timeCh)
+		for s := range timeCh {
+			err := c.update(s)
+			if err != nil {
+				logger.Log.Error.Println(err)
+				return
+			}
 		}
 	}()
 }
 
 // Updates value and redraw to display.
-func (c *ClockWidget) update() error {
-	coloredNumbers := setColorToChars(getFormattedTime(time.Now()), "[red:red]")
+func (c *ClockWidget) update(newTime string) error {
+	coloredNumbers := setColorToChars(newTime, "[red:red]")
 
 	if len(coloredNumbers) != len(c.digits) {
 		return errors.New("Needs as many numbers as tview.TextView to display them.")
