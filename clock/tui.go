@@ -57,6 +57,26 @@ func (c *ClockWidget) UpdateBorderColor() {
 	}
 }
 
+// Updates value and redraw to display.
+func (c *ClockWidget) update(newTime string) error {
+	coloredNumbers := setColorToChars(newTime, "[blue:blue]")
+
+	if len(coloredNumbers) != len(c.digits) {
+		return errors.New("Needs as many numbers as tview.TextView to display them.")
+	}
+
+	for idx := range c.digits {
+		c.digits[idx].Clear()
+		fmt.Fprintf(
+			c.digits[idx],
+			"%s",
+			coloredNumbers[idx],
+		)
+	}
+
+	return nil
+}
+
 // Runs update() if no error happens, starts a goroutine.
 // First goroutine create a channel, start loopCurrentTime as a goroutine.
 // Listen to the channel for a new value.
@@ -79,24 +99,4 @@ func (c *ClockWidget) Run() {
 			}
 		}
 	}()
-}
-
-// Updates value and redraw to display.
-func (c *ClockWidget) update(newTime string) error {
-	coloredNumbers := setColorToChars(newTime, "[red:red]")
-
-	if len(coloredNumbers) != len(c.digits) {
-		return errors.New("Needs as many numbers as tview.TextView to display them.")
-	}
-
-	for idx := range c.digits {
-		c.digits[idx].Clear()
-		fmt.Fprintf(
-			c.digits[idx],
-			"%s",
-			coloredNumbers[idx],
-		)
-	}
-
-	return nil
 }
