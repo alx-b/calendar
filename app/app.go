@@ -4,6 +4,7 @@ import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 
+	"github.com/alx-b/calendar/calendar"
 	"github.com/alx-b/calendar/clock"
 	"github.com/alx-b/calendar/logger"
 )
@@ -19,10 +20,14 @@ func Run() {
 	clock := clock.NewClockWidget(app)
 	clock.Run()
 
+	calendar := calendar.NewCalendarWidget(app)
+	calendar.Run()
+
 	//= Main layout ==========================
 	layoutFlex := tview.NewFlex().
 		SetDirection(tview.FlexRow).
-		AddItem(clock.Layout, 0, 1, false)
+		AddItem(clock.Layout, 0, 1, false).
+		AddItem(calendar.Layout, 0, 1, false)
 
 	//= Keybindings ==========================
 	app.SetInputCapture(func(e *tcell.EventKey) *tcell.EventKey {
@@ -32,7 +37,7 @@ func Run() {
 		return e
 	})
 
-	if err := app.SetRoot(layoutFlex, true).EnableMouse(false).SetFocus(layoutFlex.GetItem(0)).Run(); err != nil {
+	if err := app.SetRoot(layoutFlex, true).EnableMouse(true).SetFocus(layoutFlex.GetItem(0)).Run(); err != nil {
 		panic(err)
 	}
 }
